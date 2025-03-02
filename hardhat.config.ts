@@ -9,6 +9,7 @@ import 'hardhat-deploy'
 import 'hardhat-contract-sizer'
 import '@nomiclabs/hardhat-ethers'
 import '@layerzerolabs/toolbox-hardhat'
+import '@nomicfoundation/hardhat-verify'
 import { HardhatUserConfig, HttpNetworkAccountsUserConfig } from 'hardhat/types'
 
 import { EndpointId } from '@layerzerolabs/lz-definitions'
@@ -71,6 +72,25 @@ const config: HardhatUserConfig = {
         deployer: {
             default: 0, // wallet address of index[0], of the mnemonic in .env
         },
+    },
+    etherscan: {
+        apiKey: {
+            sepolia: process.env.ETHERSCAN_API_KEY || '',
+            'rootstock-testnet': 'API_KEY',
+        },
+        customChains: [
+            {
+                network: 'rootstock-testnet',
+                chainId: 31,
+                urls: {
+                    apiURL: 'https://rootstock-testnet.blockscout.com/api/',
+                    browserURL: 'https://rootstock-testnet.blockscout.com/',
+                },
+            },
+        ],
+    },
+    sourcify: {
+        enabled: true,
     },
 }
 
