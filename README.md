@@ -150,6 +150,25 @@ npx hardhat lz:oapp:wire --oapp-config layerzero.config.ts
 
 This command sets up the necessary connections between your deployed contracts on different chains.
 
+
+### 8. Verify Contracts
+
+You can verify your contracts by running the following command:
+
+```bash
+npx hardhat verify --network <network> <contract-address> <constructor-arguments>
+```
+
+For example, to verify the `MyOFT` contract on Rootstock Testnet, you would run:
+
+```bash
+
+npx hardhat verify --network rootstock-testnet <contract-address> "MyOFT" "MOFT" <endpoint-address> <owner-address>
+```
+
+
+> **Note:** Replace `<endpoint-address>` with the LayerZero endpoint address for the respective network and `<owner-address>` with your deployer address.
+
 You can monitor your cross-chain transactions using:
 
 - [LayerZero Scan](https://layerzeroscan.com/) - Official LayerZero explorer
