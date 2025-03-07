@@ -1,3 +1,6 @@
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/rsksmart/rsk-layerzero-xerc20/badge)](https://scorecard.dev/viewer/?uri=github.com/rsksmart/rsk-layerzero-xerc20)
+[![CodeQL](https://github.com/rsksmart/rsk-layerzero-xerc20/workflows/CodeQL/badge.svg)](https://github.com/rsksmart/rsk-layerzero-xerc20/actions?query=workflow%3ACodeQL)
+
 <p align="center">
   <a href="https://layerzero.network">
     <img alt="LayerZero" style="width: auto" src="images/L0.png"/>
