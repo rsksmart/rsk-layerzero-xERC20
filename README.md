@@ -193,3 +193,35 @@ If you encounter issues:
 - [OFT Standard Specification](https://docs.layerzero.network/contracts/oft)
 - [Rootstock Documentation](https://developers.rsk.co/)
 
+## OFT Minting Task
+
+To mint OFT tokens on a specific network, you can use the following command:
+
+```shell
+npx hardhat lz:oft:mint \
+  --contract <OFT_CONTRACT_ADDRESS> \
+  --network <NETWORK_NAME> \
+  --amount <AMOUNT_TO_MINT> \
+  --private-key <YOUR_PRIVATE_KEY>
+```
+
+**Important Security Note**: Never share your private key or commit it to source control. Use environment variables or secure key management solutions instead.
+
+For safer usage, store your private key in an environment variable:
+
+```shell
+# First set the environment variable
+export PRIVATE_KEY=your_private_key_here
+
+# Then use it in the command
+npx hardhat lz:oft:mint \
+  --contract 0xYourContractAddress \
+  --network rootstock-testnet \
+  --amount 10 \
+  --private-key $PRIVATE_KEY
+```
+
+If no recipient is specified, tokens will be minted to the address associated with the provided private key.
+
+Note: This task requires using a contract with a mint function (e.g., `MyOFTMock`). The standard `MyOFT` contract doesn't have this function.
+
