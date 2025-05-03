@@ -64,6 +64,11 @@ const config: HardhatUserConfig = {
             url: process.env.RPC_URL_ROOTSTOCK_TESTNET || 'https://public-node.testnet.rsk.co',
             accounts,
         },
+        'optimism-testnet': {
+            eid: EndpointId.OPTSEP_V2_TESTNET,
+            url: process.env.RPC_URL_OP_SEPOLIA || 'https://opt-sepolia.g.alchemy.com/v2/YU9cnPZhP1bB5L73LlbCJX7JOk61DYYf',
+            accounts,
+        },
         hardhat: {
             // Need this for testing because TestHelperOz5.sol is exceeding the compiled contract size limit
             allowUnlimitedContractSize: true,

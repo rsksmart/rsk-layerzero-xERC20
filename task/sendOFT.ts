@@ -37,6 +37,20 @@ function getErrorMessage(error: unknown): string {
     return String(error);
 }
 
+
+  /*
+
+
+npx hardhat lz:oft:send \
+  --contract 0x326D95F50242fD90D718DbDaAc792899289de013 \
+  --recipient 0xB0Fbf33313303AB3C4454697FC727b80f99C94B4 \
+  --source sepolia-testnet \
+  --destination optimism-testnet \
+  --amount 1 \
+  --privatekey <>
+
+    */
+
 task('lz:oft:send', 'Send tokens cross-chain using LayerZero technology')
     .addParam('contract', 'Contract address on source network')
     .addParam('recipient', 'Recipient address on destination network')
