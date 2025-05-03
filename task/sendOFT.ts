@@ -1,8 +1,8 @@
 import { ethers } from 'ethers'
 import { task } from 'hardhat/config'
-import '@nomicfoundation/hardhat-ethers'
+import '@nomiclabs/hardhat-ethers'
 import { parseUnits } from '@ethersproject/units'
-import { hexlify, hexZeroPad } from '@ethersproject/bytes'
+import { hexZeroPad } from '@ethersproject/bytes'
 import {
     createGetHreByEid,
     createProviderFactory,
@@ -10,102 +10,128 @@ import {
 } from '@layerzerolabs/devtools-evm-hardhat'
 import { Options } from '@layerzerolabs/lz-v2-utilities'
 
+// ABI for the OFT contract's send function
+const OFT_ABI = [
+    "function decimals() view returns (uint8)",
+    "function quoteSend(tuple(uint32 dstEid, bytes32 to, uint256 amountLD, uint256 minAmountLD, bytes extraOptions, bytes composeMsg, bytes oftCmd), bool payInLzToken) view returns (tuple(uint256 nativeFee, uint256 lzTokenFee))",
+    "function send(tuple(uint32 dstEid, bytes32 to, uint256 amountLD, uint256 minAmountLD, bytes extraOptions, bytes composeMsg, bytes oftCmd), tuple(uint256 nativeFee, uint256 lzTokenFee), address refundAddress) payable returns (tuple(bytes32 guid, uint64 nonce, uint256 fee), tuple(uint256 amountSentLD, uint256 amountReceivedLD))"
+];
 
+// Helper to handle error messages
+function getErrorMessage(error: unknown): string {
+    if (!error) return 'Unknown error';
+    
+    if (typeof error === 'object' && error !== null) {
+        if ('message' in error && typeof (error as any).message === 'string') {
+            const message = (error as any).message;
+            
+            // Common error patterns and clearer messages
+            if (message.includes('insufficient funds')) {
+                return 'Insufficient funds for transaction.';
+            }
+            
+            return message;
+        }
+    }
+    
+    return String(error);
+}
 
 task('lz:oft:send', 'Send tokens cross-chain using LayerZero technology')
-    .addParam('contractA', 'Contract address on network A')
-    .addParam('recipientB', 'Recipient address on network B')
-    .addParam('networkA', 'Name of the network A')
-    .addParam('networkB', 'Name of the network B')
+    .addParam('contract', 'Contract address on source network')
+    .addParam('recipient', 'Recipient address on destination network')
+    .addParam('source', 'Name of the source network')
+    .addParam('destination', 'Name of the destination network')
     .addParam('amount', 'Amount to transfer in token decimals')
-    .addParam('privateKey', 'Private key of the sender')
+    .addParam('privatekey', 'Private key of the sender')
     .setAction(async (taskArgs, hre) => {
-        
-        const eidA = getEidForNetworkName(taskArgs.networkA)
-       
-        const eidB = getEidForNetworkName(taskArgs.networkB)
-       
-        const contractA = taskArgs.contractA
-       
-        const recipientB = taskArgs.recipientB
-
-        const environmentFactory = createGetHreByEid()
-        
-        const providerFactory = createProviderFactory(environmentFactory)
-        
-        const provider = await providerFactory(eidA)
-        
-        const wallet = new ethers.Wallet(taskArgs.privateKey, provider)
-
-        const oftContractFactory = await hre.ethers.getContractFactory('MyOFT')
-        
-        const oft = oftContractFactory.attach(contractA)
-
-        const decimals = await oft.decimals()
-        
-        const amount = parseUnits(taskArgs.amount, decimals)
-        
-        const options = Options.newOptions().addExecutorLzReceiveOption(200000, 0).toHex().toString()
-        
-        const recipientAddressBytes32 = hexZeroPad(recipientB, 32)
-
-        // Estimate the fee
         try {
-            console.log("Attempting to call quoteSend with parameters:", {
-                dstEid: eidB,
-                to: recipientAddressBytes32,
-                amountLD: amount,
-                minAmountLD: amount.mul(98).div(100),
-                extraOptions: options,
-                composeMsg: '0x',
-                oftCmd: '0x',
-            });
-
-            const nativeFee = (await oft.quoteSend(
-                [eidB, recipientAddressBytes32, amount, amount.mul(98).div(100), options, '0x', '0x'],
-                false
-            ))[0]
+            // Get endpoint IDs for source and destination networks
+            const eidA = getEidForNetworkName(taskArgs.source);
+            const eidB = getEidForNetworkName(taskArgs.destination);
+            const contractAddress = taskArgs.contract;
+            const recipient = taskArgs.recipient;
             
-            console.log('Estimated native fee:', nativeFee.toString())
+            console.log(`Source Network: ${taskArgs.source} (EID: ${eidA})`);
+            console.log(`Destination Network: ${taskArgs.destination} (EID: ${eidB})`);
+            console.log(`Contract: ${contractAddress}`);
+            console.log(`Recipient: ${recipient}`);
 
-            // Overkill native fee to ensure sufficient gas
-            const overkillNativeFee = nativeFee.mul(2)
-
-            // Fetch the current gas price and nonce
-            const gasPrice = await provider.getGasPrice()
-
-            const nonce = await provider.getTransactionCount(wallet.address)
-
-            // Prepare send parameters
-            const sendParam = [eidB, recipientAddressBytes32, amount, amount.mul(98).div(100), options, '0x', '0x']
-            const feeParam = [overkillNativeFee, 0]
-
-            // Sending the tokens with increased gas price
-            console.log(`Sending ${taskArgs.amount} token(s) from network ${taskArgs.networkA} to network ${taskArgs.networkB}`)
-          
-            const tx = await oft.send(sendParam, feeParam, wallet.address, {
-                value: overkillNativeFee,
-                gasPrice: gasPrice.mul(2),
-                nonce,
-                gasLimit: hexlify(7000000),
-            })
-
-            console.log('Transaction hash:', tx.hash)
-
-            await tx.wait()
-          
-            console.log(
-                `Tokens sent successfully to the recipient on the destination chain. View on LayerZero Scan: https://layerzeroscan.com/tx/${tx.hash}`
-            )
-
+            // Get provider for source network
+            const environmentFactory = createGetHreByEid();
+            const providerFactory = createProviderFactory(environmentFactory);
+            const provider = await providerFactory(eidA);
+            
+            // Create wallet from private key
+            const wallet = new ethers.Wallet(taskArgs.privatekey, provider);
+            console.log(`Sender address: ${wallet.address}`);
+            
+            // Create contract instance directly without using contract factory
+            const oftContract = new ethers.Contract(contractAddress, OFT_ABI, wallet);
+            
+            // Get token decimals and parse amount
+            const decimals = await oftContract.decimals();
+            const amount = parseUnits(taskArgs.amount, decimals);
+            console.log(`Amount to send: ${taskArgs.amount} tokens`);
+            
+            // Create options for the transfer
+            const options = Options.newOptions().addExecutorLzReceiveOption(200000, 0).toHex().toString();
+            
+            // Convert recipient address to bytes32
+            const recipientAddressBytes32 = hexZeroPad(recipient, 32);
+            
+            // Parameters for the send function
+            const sendParam = [eidB, recipientAddressBytes32, amount, amount.mul(98).div(100), options, '0x', '0x'];
+            
+            // Quote the fees required for the transfer
+            console.log(`Estimating fees...`);
+            const [nativeFee] = await oftContract.quoteSend(sendParam, false);
+            console.log(`Estimated fee: ${ethers.utils.formatEther(nativeFee)} native tokens`);
+            
+            // Double the fee to ensure the transaction doesn't fail
+            const overkillNativeFee = nativeFee.mul(2);
+            console.log(`Using fee with buffer: ${ethers.utils.formatEther(overkillNativeFee)} native tokens`);
+            
+            // Get current gas price
+            const gasPrice = await provider.getGasPrice();
+            console.log(`Current gas price: ${ethers.utils.formatUnits(gasPrice, 'gwei')} gwei`);
+            
+            // Fee parameters
+            const feeParam = [overkillNativeFee, 0];
+            
+            // Send the transaction
+            console.log(`\nSending ${taskArgs.amount} token(s) from ${taskArgs.source} to ${taskArgs.destination}...`);
+            const tx = await oftContract.send(
+                sendParam, 
+                feeParam, 
+                wallet.address, 
+                {
+                    value: overkillNativeFee,
+                    gasPrice: gasPrice.mul(12).div(10), // 20% higher gas price
+                    gasLimit: 6000000, 
+                }
+            );
+            
+            console.log(`Transaction hash: ${tx.hash}`);
+            console.log(`Waiting for transaction confirmation...`);
+            
+            // Wait for the transaction to be confirmed
+            const receipt = await tx.wait();
+            console.log(`Transaction confirmed in block ${receipt.blockNumber}`);
+            
+            console.log(`\nTokens sent successfully! View on LayerZero Scan: https://layerzeroscan.com/tx/${tx.hash}`);
+            
+            return receipt;
         } catch (error) {
-
-            console.error('Error during quoteSend or send operation:', error)
-
-            if (error?.data) {
-                console.error("Reverted with data:", error.data)
+            console.error(`\nError during token transfer: ${getErrorMessage(error)}`);
+            
+            // Extract more information if available
+            if (error && typeof error === 'object' && 'data' in error) {
+                console.error(`Contract revert data: ${(error as any).data}`);
             }
+            
+            return null;
         }
-    })
+    });
 
 
