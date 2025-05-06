@@ -66,7 +66,7 @@ const config: HardhatUserConfig = {
         },
         'optimism-testnet': {
             eid: EndpointId.OPTSEP_V2_TESTNET,
-            url: process.env.RPC_URL_OP_SEPOLIA || 'https://opt-sepolia.g.alchemy.com/v2/YU9cnPZhP1bB5L73LlbCJX7JOk61DYYf',
+            url: process.env.RPC_URL_OP_SEPOLIA || '',
             accounts,
         },
         hardhat: {
