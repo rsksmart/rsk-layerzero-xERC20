@@ -21,7 +21,7 @@ const OFT_ABI = [
 function getErrorMessage(error: unknown): string {
     if (!error) return 'Unknown error';
     
-    if (typeof error === 'object' && error !== null) {
+    if (typeof error === 'object' && error !== null && !(error instanceof Date) && !(error instanceof RegExp)) {
         if ('message' in error && typeof (error as any).message === 'string') {
             const message = (error as any).message;
             

@@ -18,7 +18,7 @@ const MINT_FUNCTION_ABI = [
 function getErrorMessage(error: unknown): string {
     if (!error) return 'Unknown error';
     
-    if (typeof error === 'object' && error !== null) {
+    if (error !== null && typeof error === 'object') {
         if ('message' in error && typeof (error as any).message === 'string') {
             const message = (error as any).message;
             
