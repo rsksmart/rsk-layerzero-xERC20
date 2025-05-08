@@ -193,3 +193,82 @@ If you encounter issues:
 - [OFT Standard Specification](https://docs.layerzero.network/contracts/oft)
 - [Rootstock Documentation](https://developers.rsk.co/)
 
+## OFT Minting Task
+
+To mint OFT tokens on a specific network, you can use the following command:
+
+```shell
+npx hardhat lz:oft:mint \
+  --contract <OFT_CONTRACT_ADDRESS> \
+  --network <NETWORK_NAME> \
+  --amount <AMOUNT_TO_MINT> \
+  --private-key <YOUR_PRIVATE_KEY>
+```
+
+**Important Security Note**: Never share your private key or commit it to source control. Use environment variables or secure key management solutions instead.
+
+For safer usage, store your private key in an environment variable:
+
+```shell
+# First set the environment variable
+export PRIVATE_KEY=your_private_key_here
+
+# Then use it in the command
+npx hardhat lz:oft:mint \
+  --contract 0xYourContractAddress \
+  --network rootstock-testnet \
+  --amount 10 \
+  --private-key $PRIVATE_KEY
+```
+
+If no recipient is specified, tokens will be minted to the address associated with the provided private key.
+
+Note: This task requires using a contract with a mint function (e.g., `MyOFTMock`). The standard `MyOFT` contract doesn't have this function.
+
+## Cross-Chain Token Transfer
+
+After minting tokens, you can send them between networks using the LayerZero protocol. The `lz:oft:send` task allows you to transfer tokens from one chain to another seamlessly.
+
+### Sending Tokens from Source to Destination Chain
+
+```shell
+npx hardhat lz:oft:send \
+  --contract <SOURCE_CHAIN_CONTRACT_ADDRESS> \
+  --recipient <RECIPIENT_ADDRESS> \
+  --source <SOURCE_NETWORK> \
+  --destination <DESTINATION_NETWORK> \
+  --amount <AMOUNT_TO_SEND> \
+  --privatekey <YOUR_PRIVATE_KEY>
+```
+
+For example, to send tokens from Sepolia to Rootstock:
+
+```shell
+npx hardhat lz:oft:send \
+  --contract 0xa574d50d1a0244625D46eB0209E819e8AbBc4ee2 \
+  --recipient 0xYourAddress \
+  --source sepolia-testnet \
+  --destination rootstock-testnet \
+  --amount 1 \
+  --privatekey $PRIVATE_KEY
+```
+
+Or to send tokens from Rootstock to Sepolia:
+
+```shell
+npx hardhat lz:oft:send \
+  --contract 0x2F00bB23390cC48b4ce3DeD692792c0320406ED1 \
+  --recipient 0xYourAddress \
+  --source rootstock-testnet \
+  --destination sepolia-testnet \
+  --amount 1 \
+  --privatekey $PRIVATE_KEY
+```
+
+**Note**: Make sure you have:
+1. Minted tokens on the source network
+2. Sufficient native tokens (ETH on Sepolia, RBTC on Rootstock) to pay for gas fees and LayerZero fees
+3. The correct contract addresses for each network
+
+The transaction can take a few minutes to be confirmed on both chains, as it needs to be processed by LayerZero's infrastructure. You can track the status of your cross-chain transaction using [LayerZero Scan](https://layerzeroscan.com/).
+

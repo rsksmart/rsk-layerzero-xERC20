@@ -13,6 +13,7 @@ import '@nomicfoundation/hardhat-verify'
 import { HardhatUserConfig, HttpNetworkAccountsUserConfig } from 'hardhat/types'
 
 import { EndpointId } from '@layerzerolabs/lz-definitions'
+import './task/index'
 
 // Set your preferred authentication method
 //
