@@ -35,19 +35,13 @@ To complete this guide, you'll need:
 
 ## Project Setup
 
-### 1. Create a New LayerZero Project
+### 1. Clone LayerZero Project Repo
 
-First, navigate to the folder you want to create your project and run the following command to create a new LayerZero project:
+Clone the repository:
 
 ```zsh
-npx create-lz-oapp@latest
+git clone https://github.com/rsksmart/rsk-layerzero-xERC20.git
 ```
-
-<p align="center">
-  <a href="https://layerzero.network">
-    <img alt="LayerZero" style="width: 600px" src="images/create.png"/>
-  </a>
-</p>
 
 ### 2. Setup environment variables
 
@@ -56,7 +50,6 @@ Rename the `.env.example` file to `.env` and update the environment variables wi
 
 ```markdown
 # By default, the examples support both mnemonic-based and private key-based authentication
-# 
 # You don't need to set both of these values, just pick the one that you prefer and set that one
 MNEMONIC=
 PRIVATE_KEY=
@@ -178,20 +171,6 @@ You can monitor your cross-chain transactions using:
 - [Rootstock Explorer](https://explorer.testnet.rsk.co/) - For Rootstock testnet transactions
 - [Sepolia Etherscan](https://sepolia.etherscan.io/) - For Ethereum Sepolia transactions
 
-## Troubleshooting
-
-If you encounter issues:
-
-- Ensure you have sufficient test tokens on both networks
-- Verify your RPC endpoints are working correctly
-- Check that your contracts are properly configured for cross-chain messaging
-- Examine transaction logs for specific error messages
-
-## Resources
-
-- [LayerZero Documentation](https://docs.layerzero.network/)
-- [OFT Standard Specification](https://docs.layerzero.network/contracts/oft)
-- [Rootstock Documentation](https://developers.rsk.co/)
 
 ## OFT Minting Task
 
@@ -272,3 +251,17 @@ npx hardhat lz:oft:send \
 
 The transaction can take a few minutes to be confirmed on both chains, as it needs to be processed by LayerZero's infrastructure. You can track the status of your cross-chain transaction using [LayerZero Scan](https://layerzeroscan.com/).
 
+## Troubleshooting
+
+If you encounter issues:
+
+- Ensure you have sufficient test tokens on both networks
+- Verify your RPC endpoints are working correctly
+- Check that your contracts are properly configured for cross-chain messaging
+- Examine transaction logs for specific error messages
+
+## Resources
+
+- [LayerZero Documentation](https://docs.layerzero.network/)
+- [OFT Standard Specification](https://docs.layerzero.network/contracts/oft)
+- [Rootstock Documentation](https://developers.rsk.co/)
